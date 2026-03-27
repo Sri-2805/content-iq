@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, Copy, Bookmark, RefreshCw, Loader2 } from "lucide-react";
+import { MessageSquare, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useCopyButton, useSaveButton, useLikeButton } from "@/hooks/use-micro-interactions";
+import EmptyState from "@/components/dashboard/EmptyState";
 
 const platformOptions = ["Instagram", "TikTok", "YouTube", "LinkedIn", "Twitter/X"];
 const toneOptions = ["Professional", "Casual", "Funny", "Motivational"];
@@ -26,6 +28,9 @@ const CaptionGenerator = () => {
   const [captions, setCaptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { CopyBtn } = useCopyButton();
+  const { SaveBtn } = useSaveButton();
+  const { LikeBtn } = useLikeButton();
 
   const handleGenerate = () => {
     if (!description || !platform || !tone) {
@@ -81,7 +86,7 @@ const CaptionGenerator = () => {
             <Label className="text-sm">Include emojis</Label>
           </div>
         </div>
-        <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 px-8">
+        <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 px-8 animate-pulse-glow">
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : "Generate Caption"}
         </Button>
       </motion.div>
@@ -101,19 +106,18 @@ const CaptionGenerator = () => {
       {captions.length > 0 && (
         <div className="space-y-4">
           {captions.map((caption, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5 hover:border-primary/20 hover:scale-[1.01] transition-all duration-200">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium text-muted-foreground">Variation {i + 1}</span>
-                <span className="text-xs text-muted-foreground">{caption.length} characters</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{caption.length} characters</span>
+                  <LikeBtn id={`caption-${i}`} />
+                </div>
               </div>
               <p className="text-sm whitespace-pre-line leading-relaxed mb-4">{caption}</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="text-xs border-border" onClick={() => toast({ title: "Copied!" })}>
-                  <Copy className="w-3 h-3 mr-1" /> Copy
-                </Button>
-                <Button size="sm" variant="outline" className="text-xs border-border" onClick={() => toast({ title: "Saved!" })}>
-                  <Bookmark className="w-3 h-3 mr-1" /> Save
-                </Button>
+                <CopyBtn text={caption} id={`caption-copy-${i}`} />
+                <SaveBtn id={`caption-save-${i}`} />
                 <Button size="sm" variant="outline" className="text-xs border-border" onClick={() => toast({ title: "Regenerating..." })}>
                   <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
                 </Button>
@@ -124,10 +128,14 @@ const CaptionGenerator = () => {
       )}
 
       {!loading && captions.length === 0 && (
-        <div className="text-center py-16">
-          <MessageSquare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">Describe your post above and generate engaging captions.</p>
-        </div>
+        <EmptyState
+          icon={MessageSquare}
+          emoji="✍️"
+          title="No captions yet"
+          description="Describe your post above and generate engaging captions tailored to your platform and tone."
+          actionLabel="Start Writing"
+          onAction={() => document.querySelector('textarea')?.focus()}
+        />
       )}
     </div>
   );
