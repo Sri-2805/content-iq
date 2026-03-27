@@ -98,6 +98,9 @@ const DashboardHome = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
+      {/* Trial banner */}
+      <TrialBanner daysRemaining={5} onUpgrade={() => setUpgradeOpen(true)} />
+
       {/* Welcome */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold mb-1">Welcome back! 👋</h1>
