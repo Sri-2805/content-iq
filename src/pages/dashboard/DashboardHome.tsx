@@ -79,6 +79,7 @@ const platformColors: Record<string, string> = {
 };
 
 const DashboardHome = () => {
+  const quote = useMemo(() => getDailyQuote(), []);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const weekDays = useMemo(() => getNext7Days(), []);
   const [checklist, setChecklist] = useState([
