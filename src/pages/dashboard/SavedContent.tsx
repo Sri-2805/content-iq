@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Search, Copy, Trash2, Lightbulb, MessageSquare, Hash } from "lucide-react";
+import { Bookmark, Search, Copy, Trash2, Lightbulb, MessageSquare, Hash, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useLikeButton } from "@/hooks/use-micro-interactions";
+import EmptyState from "@/components/dashboard/EmptyState";
 
 const savedItems = [
   { id: 1, type: "idea", content: "5 Mistakes Beginners Make", platform: "Instagram", date: "2 days ago" },
@@ -21,13 +23,22 @@ const typeColors = { idea: "text-primary", caption: "text-accent", hashtag: "tex
 const SavedContent = () => {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [copiedId, setCopiedId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { LikeBtn } = useLikeButton();
 
   const filtered = savedItems.filter((item) => {
     if (typeFilter !== "all" && item.type !== typeFilter) return false;
     if (search && !item.content.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  const handleCopy = (id: number, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    toast({ title: "Copied to clipboard!" });
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
@@ -60,7 +71,7 @@ const SavedContent = () => {
             const Icon = typeIcons[item.type as keyof typeof typeIcons];
             const color = typeColors[item.type as keyof typeof typeColors];
             return (
-              <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card rounded-xl p-5">
+              <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-card rounded-xl p-5 hover:border-primary/20 hover:scale-[1.02] transition-all duration-200">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Icon className={`w-4 h-4 ${color}`} />
@@ -71,11 +82,12 @@ const SavedContent = () => {
                 <p className="text-sm mb-3 line-clamp-2">{item.content}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{item.platform}</span>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => toast({ title: "Copied!" })}>
-                      <Copy className="w-3 h-3" />
+                  <div className="flex items-center gap-1">
+                    <LikeBtn id={`saved-${item.id}`} />
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 transition-all duration-200" onClick={() => handleCopy(item.id, item.content)}>
+                      {copiedId === item.id ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" onClick={() => toast({ title: "Deleted" })}>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => toast({ title: "Deleted" })}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
@@ -84,11 +96,24 @@ const SavedContent = () => {
             );
           })}
         </div>
+      ) : search || typeFilter !== "all" ? (
+        <EmptyState
+          icon={Search}
+          emoji="🔍"
+          title="No results found"
+          description={`No saved content matches "${search || typeFilter}". Try adjusting your search or filters.`}
+          actionLabel="Clear Filters"
+          onAction={() => { setSearch(""); setTypeFilter("all"); }}
+        />
       ) : (
-        <div className="text-center py-16">
-          <Bookmark className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">No saved content found. Start generating and saving content!</p>
-        </div>
+        <EmptyState
+          icon={Bookmark}
+          emoji="📌"
+          title="Nothing saved yet"
+          description="Start generating content and save your favorites here for easy access later."
+          actionLabel="Generate Content Ideas"
+          actionPath="/dashboard/ideas"
+        />
       )}
     </div>
   );

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Hash, Copy, Bookmark, Loader2 } from "lucide-react";
+import { Hash, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useSaveButton } from "@/hooks/use-micro-interactions";
+import EmptyState from "@/components/dashboard/EmptyState";
 
 const platformOptions = ["Instagram", "TikTok", "YouTube", "LinkedIn", "Twitter/X"];
 const sizeOptions = ["Mixed (recommended)", "Mega (1M+)", "Large (100K+)", "Medium (10K+)", "Small niche (1K+)"];
@@ -22,7 +24,9 @@ const HashtagGenerator = () => {
   const [size, setSize] = useState("");
   const [hashtags, setHashtags] = useState<typeof mockHashtags | null>(null);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { SaveBtn } = useSaveButton();
 
   const handleGenerate = () => {
     if (!topic || !platform) {
@@ -42,7 +46,9 @@ const HashtagGenerator = () => {
     if (!hashtags) return;
     const all = [...hashtags.mega, ...hashtags.large, ...hashtags.small].join(" ");
     navigator.clipboard.writeText(all);
+    setCopied(true);
     toast({ title: "All hashtags copied!" });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -75,7 +81,7 @@ const HashtagGenerator = () => {
             </Select>
           </div>
         </div>
-        <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 px-8">
+        <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 px-8 animate-pulse-glow">
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : "Generate Hashtags"}
         </Button>
       </motion.div>
@@ -92,23 +98,27 @@ const HashtagGenerator = () => {
       {hashtags && (
         <div className="space-y-6">
           <div className="flex justify-end gap-2">
-            <Button onClick={copyAll} variant="outline" className="border-border text-sm">
-              <Copy className="w-4 h-4 mr-2" /> Copy All 30
+            <Button onClick={copyAll} variant="outline" className="border-border text-sm transition-all duration-200">
+              {copied ? (
+                <><span className="text-success">✓</span> Copied!</>
+              ) : (
+                <><Copy className="w-4 h-4 mr-2" /> Copy All 30</>
+              )}
             </Button>
-            <Button variant="outline" className="border-border text-sm" onClick={() => toast({ title: "Hashtag set saved!" })}>
-              <Bookmark className="w-4 h-4 mr-2" /> Save Set
-            </Button>
+            <SaveBtn id="hashtag-set-all" />
           </div>
           {[
             { label: "Mega (1M+ posts)", tags: hashtags.mega, color: "text-accent" },
             { label: "Large (100K+ posts)", tags: hashtags.large, color: "text-primary" },
             { label: "Niche (1K+ posts)", tags: hashtags.small, color: "text-success" },
           ].map((group) => (
-            <motion.div key={group.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-xl p-5">
+            <motion.div key={group.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-xl p-5 hover:scale-[1.01] transition-all duration-200">
               <h3 className={`text-sm font-semibold mb-3 ${group.color}`}>{group.label}</h3>
               <div className="flex flex-wrap gap-2">
                 {group.tags.map((tag) => (
-                  <span key={tag} className="text-xs px-3 py-1.5 rounded-full bg-muted border border-border hover:border-primary/30 cursor-pointer transition-colors">
+                  <span key={tag} className="text-xs px-3 py-1.5 rounded-full bg-muted border border-border hover:border-primary/30 hover:scale-105 cursor-pointer transition-all duration-200"
+                    onClick={() => { navigator.clipboard.writeText(tag); toast({ title: `${tag} copied!` }); }}
+                  >
                     {tag}
                   </span>
                 ))}
@@ -119,10 +129,14 @@ const HashtagGenerator = () => {
       )}
 
       {!loading && !hashtags && (
-        <div className="text-center py-16">
-          <Hash className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">Enter a topic and generate optimized hashtags.</p>
-        </div>
+        <EmptyState
+          icon={Hash}
+          emoji="#️⃣"
+          title="No hashtags generated yet"
+          description="Enter a topic and platform to generate 30 optimized hashtags grouped by reach."
+          actionLabel="Enter a Topic"
+          onAction={() => document.querySelector('input')?.focus()}
+        />
       )}
     </div>
   );

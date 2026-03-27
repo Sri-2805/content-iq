@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lightbulb, Copy, Bookmark, Loader2 } from "lucide-react";
+import { Lightbulb, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useCopyButton, useSaveButton, useLikeButton } from "@/hooks/use-micro-interactions";
+import EmptyState from "@/components/dashboard/EmptyState";
 
 const platformOptions = ["Instagram", "TikTok", "YouTube", "LinkedIn", "Twitter/X"];
 const contentTypes = ["Educational", "Entertaining", "Promotional", "Inspirational", "Behind the scenes"];
@@ -38,6 +40,9 @@ const ContentIdeas = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { CopyBtn } = useCopyButton();
+  const { SaveBtn } = useSaveButton();
+  const { LikeBtn } = useLikeButton();
 
   const handleGenerate = () => {
     if (!platform || !contentType || !tone) {
@@ -89,7 +94,7 @@ const ContentIdeas = () => {
           </Select>
         </div>
         <div className="sm:col-span-2">
-          <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 w-full sm:w-auto px-8">
+          <Button onClick={handleGenerate} disabled={loading} className="gradient-bg border-0 text-primary-foreground hover:opacity-90 w-full sm:w-auto px-8 animate-pulse-glow">
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : "Generate 10 Ideas"}
           </Button>
         </div>
@@ -115,20 +120,19 @@ const ContentIdeas = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-xl p-5 hover:border-primary/30 transition-colors"
+              className="glass-card rounded-xl p-5 hover:border-primary/30 hover:scale-[1.02] transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-semibold text-sm">{idea.title}</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0 ml-2">{idea.format}</span>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{idea.format}</span>
+                  <LikeBtn id={`idea-${i}`} />
+                </div>
               </div>
               <p className="text-xs text-muted-foreground mb-4 leading-relaxed">{idea.description}</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="text-xs border-border" onClick={() => toast({ title: "Copied to clipboard!" })}>
-                  <Copy className="w-3 h-3 mr-1" /> Copy
-                </Button>
-                <Button size="sm" variant="outline" className="text-xs border-border" onClick={() => toast({ title: "Saved to calendar!" })}>
-                  <Bookmark className="w-3 h-3 mr-1" /> Save
-                </Button>
+                <CopyBtn text={`${idea.title}: ${idea.description}`} id={`idea-copy-${i}`} />
+                <SaveBtn id={`idea-save-${i}`} />
               </div>
             </motion.div>
           ))}
@@ -136,10 +140,14 @@ const ContentIdeas = () => {
       )}
 
       {!loading && ideas.length === 0 && (
-        <div className="text-center py-16">
-          <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">Fill in the fields above and generate your first batch of content ideas.</p>
-        </div>
+        <EmptyState
+          icon={Lightbulb}
+          emoji="💡"
+          title="No ideas generated yet"
+          description="Fill in the fields above and hit Generate to get 10 tailored content ideas for your niche."
+          actionLabel="Fill in & Generate"
+          onAction={() => document.querySelector('input')?.focus()}
+        />
       )}
     </div>
   );
