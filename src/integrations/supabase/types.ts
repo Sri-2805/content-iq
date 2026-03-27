@@ -14,7 +14,198 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calendar_events: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          platform: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generated_content: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_saved: boolean | null
+          platform: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_saved?: boolean | null
+          platform?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_saved?: boolean | null
+          platform?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          plan: string
+          razorpay_payment_id: string | null
+          razorpay_subscription_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          plan: string
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          plan?: string
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          goal: string | null
+          id: string
+          name: string | null
+          niche: string | null
+          onboarding_completed: boolean | null
+          plan: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at: string | null
+          plan_started_at: string | null
+          platforms: string[] | null
+          posting_frequency: string | null
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          goal?: string | null
+          id?: string
+          name?: string | null
+          niche?: string | null
+          onboarding_completed?: boolean | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
+          platforms?: string[] | null
+          posting_frequency?: string | null
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          goal?: string | null
+          id?: string
+          name?: string | null
+          niche?: string | null
+          onboarding_completed?: boolean | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
+          platforms?: string[] | null
+          posting_frequency?: string | null
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_tracking: {
+        Row: {
+          created_at: string
+          generations_used: number
+          id: string
+          plan_limit: number
+          reset_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          generations_used?: number
+          id?: string
+          plan_limit?: number
+          reset_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          generations_used?: number
+          id?: string
+          plan_limit?: number
+          reset_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +214,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_plan: "free" | "trial" | "pro" | "agency"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +341,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_plan: ["free", "trial", "pro", "agency"],
+    },
   },
 } as const
