@@ -7,6 +7,8 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import TrialBanner from "@/components/dashboard/TrialBanner";
+import UpgradeModal from "@/components/dashboard/UpgradeModal";
 
 const motivationalQuotes = [
   { text: "Consistency is the key to success. Show up every day.", author: "Unknown" },
@@ -78,6 +80,7 @@ const platformColors: Record<string, string> = {
 
 const DashboardHome = () => {
   const quote = useMemo(() => getDailyQuote(), []);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const weekDays = useMemo(() => getNext7Days(), []);
   const [checklist, setChecklist] = useState([
     { id: "profile", label: "Complete your profile", done: true },
@@ -95,6 +98,9 @@ const DashboardHome = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
+      {/* Trial banner */}
+      <TrialBanner daysRemaining={5} onUpgrade={() => setUpgradeOpen(true)} />
+
       {/* Welcome */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold mb-1">Welcome back! 👋</h1>
@@ -233,6 +239,7 @@ const DashboardHome = () => {
           ))}
         </div>
       </motion.div>
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
   );
 };

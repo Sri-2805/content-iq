@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Crown, Sparkles, Zap, Users } from "lucide-react";
+import { X, Check, Crown, Sparkles, Zap, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { initiateRazorpayPayment, PLAN_PRICES } from "@/lib/razorpay";
+import { useToast } from "@/hooks/use-toast";
 
 interface UpgradeModalProps {
   open: boolean;
   onClose: () => void;
+  onUpgradeSuccess?: (plan: string) => void;
 }
 
 const features = [
@@ -21,7 +24,27 @@ const features = [
   { feature: "Priority Support", free: "—", pro: "—", agency: "✓" },
 ];
 
-const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
+const UpgradeModal = ({ open, onClose, onUpgradeSuccess }: UpgradeModalProps) => {
+  const [loading, setLoading] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleUpgrade = async (planId: "pro" | "agency") => {
+    setLoading(planId);
+    await initiateRazorpayPayment({
+      planId,
+      onSuccess: (plan) => {
+        setLoading(null);
+        toast({ title: `🎉 Upgraded to ${plan.charAt(0).toUpperCase() + plan.slice(1)}!` });
+        onUpgradeSuccess?.(plan);
+        onClose();
+      },
+      onError: (error) => {
+        setLoading(null);
+        toast({ title: error, variant: "destructive" });
+      },
+    });
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -41,7 +64,6 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
             className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-card rounded-2xl border border-primary/20 glow-purple"
           >
             <div className="p-6 md:p-8">
-              {/* Header */}
               <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
@@ -56,7 +78,7 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
                   <Zap className="w-3 h-3" /> Limited Time — 20% Off Annual Plans
                 </motion.div>
                 <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                  Unlock Your Full <span className="gradient-text">Creative Potential</span>
+                  Unlock Unlimited <span className="gradient-text">Content Creation</span>
                 </h2>
                 <p className="text-muted-foreground text-sm max-w-md mx-auto">
                   Join 12,000+ creators who've already upgraded their content game with ContentIQ Pro.
@@ -64,7 +86,7 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
               </div>
 
               {/* Social proof */}
-              <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="flex items-center justify-center gap-6 mb-8 flex-wrap">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Users className="w-4 h-4 text-primary" />
                   <span><strong className="text-foreground">12,847</strong> creators upgraded</span>
@@ -72,6 +94,10 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Sparkles className="w-4 h-4 text-primary" />
                   <span><strong className="text-foreground">1.2M+</strong> ideas generated</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Shield className="w-4 h-4 text-success" />
+                  <span>Secure payment via Razorpay</span>
                 </div>
               </div>
 
@@ -85,12 +111,17 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
                     <Crown className="w-5 h-5 text-primary mr-1" />
                     <span className="font-bold text-lg">Pro</span>
                   </div>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="text-3xl font-bold">$29</span>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-3xl font-bold">{PLAN_PRICES.pro.display}</span>
                     <span className="text-sm text-muted-foreground">/month</span>
                   </div>
-                  <Button className="w-full gradient-bg border-0 text-primary-foreground hover:opacity-90 animate-pulse-glow">
-                    Upgrade to Pro
+                  <p className="text-xs text-muted-foreground mb-3">7-day free trial • No hidden charges</p>
+                  <Button
+                    onClick={() => handleUpgrade("pro")}
+                    disabled={!!loading}
+                    className="w-full gradient-bg border-0 text-primary-foreground hover:opacity-90 animate-pulse-glow"
+                  >
+                    {loading === "pro" ? "Processing..." : `Upgrade to Pro — ${PLAN_PRICES.pro.display}/month`}
                   </Button>
                 </div>
                 <div className="rounded-xl border border-border p-5">
@@ -98,14 +129,27 @@ const UpgradeModal = ({ open, onClose }: UpgradeModalProps) => {
                     <Crown className="w-5 h-5 text-accent mr-1" />
                     <span className="font-bold text-lg">Agency</span>
                   </div>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="text-3xl font-bold">$79</span>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-3xl font-bold">{PLAN_PRICES.agency.display}</span>
                     <span className="text-sm text-muted-foreground">/month</span>
                   </div>
-                  <Button variant="outline" className="w-full border-border hover:bg-muted/50">
-                    Go Agency
+                  <p className="text-xs text-muted-foreground mb-3">7-day free trial • Cancel anytime</p>
+                  <Button
+                    onClick={() => handleUpgrade("agency")}
+                    disabled={!!loading}
+                    variant="outline"
+                    className="w-full border-border hover:bg-muted/50"
+                  >
+                    {loading === "agency" ? "Processing..." : "Go Agency"}
                   </Button>
                 </div>
+              </div>
+
+              {/* Trust badges */}
+              <div className="flex items-center justify-center gap-4 mb-6 text-xs text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Cancel anytime</span>
+                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Secure payment via Razorpay</span>
+                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Used by 500+ creators</span>
               </div>
 
               {/* Feature comparison */}

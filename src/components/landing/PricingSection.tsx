@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 const plans = [
   {
     name: "Free",
-    price: "$0",
+    price: "₹0",
     period: "forever",
     description: "Perfect for trying things out",
     features: [
@@ -20,7 +20,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$29",
+    price: "₹999",
     period: "/month",
     description: "For serious content creators",
     features: [
@@ -30,13 +30,14 @@ const plans = [
       "Save unlimited content",
       "Caption + hashtag generator",
       "Best time to post insights",
+      "7-day free trial",
     ],
-    cta: "Upgrade to Pro",
+    cta: "Start Free Trial",
     highlighted: true,
   },
   {
     name: "Agency",
-    price: "$79",
+    price: "₹2,499",
     period: "/month",
     description: "For teams and agencies",
     features: [
@@ -46,6 +47,7 @@ const plans = [
       "Priority support",
       "Analytics overview",
       "Bulk content generation",
+      "7-day free trial",
     ],
     cta: "Go Agency",
     highlighted: false,
