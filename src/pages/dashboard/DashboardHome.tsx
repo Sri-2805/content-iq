@@ -7,6 +7,8 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import TrialBanner from "@/components/dashboard/TrialBanner";
+import UpgradeModal from "@/components/dashboard/UpgradeModal";
 
 const motivationalQuotes = [
   { text: "Consistency is the key to success. Show up every day.", author: "Unknown" },
