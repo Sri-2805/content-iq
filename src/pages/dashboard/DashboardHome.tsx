@@ -239,6 +239,7 @@ const DashboardHome = () => {
           ))}
         </div>
       </motion.div>
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
   );
 };
