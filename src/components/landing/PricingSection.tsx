@@ -20,7 +20,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "₹999",
+    price: "₹499",
     period: "/month",
     description: "For serious content creators",
     features: [
@@ -37,7 +37,7 @@ const plans = [
   },
   {
     name: "Agency",
-    price: "₹2,499",
+    price: "₹999",
     period: "/month",
     description: "For teams and agencies",
     features: [

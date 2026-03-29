@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Calendar, Lightbulb, MessageSquare, Hash, Clock, Bookmark,
@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import GlobalSearch from "./GlobalSearch";
 import UpgradeModal from "./UpgradeModal";
+import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { title: "Home", icon: Home, path: "/dashboard" },
@@ -25,6 +26,13 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -41,7 +49,7 @@ const DashboardLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar — always visible on desktop, slides in on mobile */}
+      {/* Sidebar */}
       <aside
         className={`fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col shrink-0 transition-transform duration-300 ease-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -89,17 +97,18 @@ const DashboardLayout = () => {
           >
             <Crown className="w-4 h-4 mr-2" /> Upgrade
           </Button>
-          <Link to="/" onClick={() => setSidebarOpen(false)}>
-            <Button variant="ghost" className="w-full text-sm text-sidebar-foreground justify-start">
-              <LogOut className="w-4 h-4 mr-2" /> Log out
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            onClick={handleSignOut}
+            className="w-full text-sm text-sidebar-foreground justify-start"
+          >
+            <LogOut className="w-4 h-4 mr-2" /> Log out
+          </Button>
         </div>
       </aside>
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
         <header className="h-16 border-b border-border flex items-center justify-between px-4 lg:px-6 shrink-0 bg-background/80 backdrop-blur-xl sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
@@ -118,7 +127,7 @@ const DashboardLayout = () => {
               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full gradient-bg" />
             </button>
             <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-primary-foreground">
-              U
+              {user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
           </div>
         </header>

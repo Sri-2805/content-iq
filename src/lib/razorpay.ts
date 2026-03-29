@@ -98,6 +98,6 @@ export const initiateRazorpayPayment = async ({ planId, onSuccess, onError }: In
 
 export const PLAN_PRICES = {
   free: { amount: 0, display: "₹0", period: "forever" },
-  pro: { amount: 999, display: "₹999", period: "/month" },
-  agency: { amount: 2499, display: "₹2,499", period: "/month" },
+  pro: { amount: 499, display: "₹499", period: "/month" },
+  agency: { amount: 999, display: "₹999", period: "/month" },
 } as const;

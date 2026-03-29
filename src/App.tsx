@@ -20,6 +20,7 @@ import AnalyticsOverview from "./pages/dashboard/AnalyticsOverview";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import BillingPage from "./pages/dashboard/BillingPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +35,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<DashboardHome />} />
             <Route path="ideas" element={<ContentIdeas />} />
             <Route path="captions" element={<CaptionGenerator />} />

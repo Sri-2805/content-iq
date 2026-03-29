@@ -5,19 +5,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
       toast({ title: "Please enter your email", variant: "destructive" });
       return;
     }
-    setSent(true);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (error: any) {
+      toast({ title: "Failed to send reset email", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,8 +61,8 @@ const ForgotPassword = () => {
                   <Label htmlFor="email" className="text-sm">Email</Label>
                   <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 bg-muted/50 border-border" />
                 </div>
-                <Button type="submit" className="w-full gradient-bg border-0 text-primary-foreground hover:opacity-90">
-                  Send Reset Link
+                <Button type="submit" className="w-full gradient-bg border-0 text-primary-foreground hover:opacity-90" disabled={loading}>
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>
               <p className="text-center text-sm text-muted-foreground mt-6">

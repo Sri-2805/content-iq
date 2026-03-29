@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const niches = ["Fashion", "Tech", "Food", "Fitness", "Business", "Travel", "Beauty", "Gaming", "Education", "Other"];
 const platforms = ["Instagram", "TikTok", "YouTube", "LinkedIn", "Twitter/X", "Facebook"];
@@ -117,7 +118,9 @@ const Onboarding = () => {
     },
   ];
 
-  const handleNext = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleNext = async () => {
     if (!steps[step].valid) {
       toast({ title: "Please make a selection", variant: "destructive" });
       return;
@@ -125,8 +128,25 @@ const Onboarding = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      toast({ title: "Profile saved! 🎉" });
-      navigate("/dashboard");
+      setLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("profiles").update({
+            niche: data.niche,
+            platforms: data.platforms,
+            posting_frequency: data.frequency,
+            goal: data.goal,
+            onboarding_completed: true,
+          }).eq("user_id", user.id);
+        }
+        toast({ title: "Profile saved! 🎉" });
+        navigate("/dashboard");
+      } catch (error: any) {
+        toast({ title: "Failed to save profile", description: error.message, variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -165,8 +185,8 @@ const Onboarding = () => {
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
               )}
-              <Button onClick={handleNext} className="flex-1 gradient-bg border-0 text-primary-foreground hover:opacity-90">
-                {step === steps.length - 1 ? "Finish Setup" : "Continue"}
+              <Button onClick={handleNext} disabled={loading} className="flex-1 gradient-bg border-0 text-primary-foreground hover:opacity-90">
+                {step === steps.length - 1 ? (loading ? "Saving..." : "Finish Setup") : "Continue"}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
