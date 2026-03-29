@@ -33,8 +33,8 @@ const plans = [
 ];
 
 const mockPayments = [
-  { date: "2024-03-15", plan: "Pro", amount: "₹999", paymentId: "pay_OxKj7H8kJl", status: "Success" },
-  { date: "2024-02-15", plan: "Pro", amount: "₹999", paymentId: "pay_OwLk9I2mNp", status: "Success" },
+  { date: "2024-03-15", plan: "Pro", amount: "₹499", paymentId: "pay_OxKj7H8kJl", status: "Success" },
+  { date: "2024-02-15", plan: "Pro", amount: "₹499", paymentId: "pay_OwLk9I2mNp", status: "Success" },
 ];
 
 const BillingPage = () => {
